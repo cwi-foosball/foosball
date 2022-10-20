@@ -1,0 +1,6 @@
+*~undo-tree~
+initial_images/
+*.qcow2
+random_doc.md
+result
+debug.nix
