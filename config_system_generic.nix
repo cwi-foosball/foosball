@@ -10,7 +10,9 @@
   # services.spice-vdagentd.enable = true;
   
   # Ensure /tmp is cleared when restarting the computer
-  boot.cleanTmpDir = builtins.trace (config.virtualisation.qemu.guestAgent) true;
+  # boot.cleanTmpDir = builtins.trace (config.virtualisation.qemu.guestAgent) true;
+  # attribute qemu missing
+  boot.cleanTmpDir = true;
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";

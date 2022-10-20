@@ -58,7 +58,7 @@ $ sudo su
 
 It should create a folder `/etc/nixos/foosball`. To switch your system to this configuration, just do (from any folder):
 ```
-# nixos-rebuild switch --flake /etc/nixos/foosball#foosballrasp 
+# nixos-rebuild switch --experimental-features 'nix-command flakes' --flake /etc/nixos/foosball#foosballrasp 
 ```
 
 This configuration should enable flake for next time automatically, so you can run next time only:
