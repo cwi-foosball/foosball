@@ -36,6 +36,7 @@
             ./config_login_rasp.nix
             ./config_system_generic.nix
             ./config_system_x11.nix
+            ./config_xfce.nix
           ];
         };
       });

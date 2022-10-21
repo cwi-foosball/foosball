@@ -9,7 +9,9 @@
   hardware.enableRedistributableFirmware = true;
 
   # Otherwise the hdmi disconnects during the boot and reconnect at the end
-  boot.initrd.kernelModules = [ "vc4" "bcm2835_dma" "i2c_bcm2835" ];
+  # looks like it is still not enough...
+  # Don't enable it with qemu
+  boot.initrd.kernelModules = lib.mkIf (!(config ? virtualisation.qemu)) [ "vc4" "bcm2835_dma" "i2c_bcm2835" ];
   
   # Apparently needed for audio (dtparam), 
   # TODO: with older mainline kernels cpu frequency scaling was not supported. Not sure what is the status now.
@@ -22,7 +24,7 @@
   # I get some errors, maybe I should use the rpi3 kernel instead of the mainline one… but
   # K900 said that I should always try to stay as much as possible on mainline… which makes sense.
   # K900 also recommended to use kernel 6.0.2 (default is 5.*),
-  #boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Needed for the virtual console to work on the RPi 3, as the default of 16M
   # doesn't seem to be enough. If X.org behaves weirdly (I only saw the cursor)
