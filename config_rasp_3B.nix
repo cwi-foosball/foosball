@@ -1,5 +1,16 @@
 { config, pkgs, lib, ... }:
 {
+  # Create a swap file. Raspberry pi 3B has only 1G of ram, and nixos-rebuild takes a *lot* of ram to evaluate
+  # the nixpgks store (someone even recommended me to evaluate the store on my laptop, either via binfmt to
+  # emulate Aarch64 or to use the rasp as a remote builder to keep the evaluation locally). When the system runs
+  # out of RAM, it freezes. 
+  swapDevices = [
+    {
+      device = "/swapfile";
+      # create a smaller file on qemu, just to test
+      size = if (config ? virtualisation.qemu) then 127 else 1024;
+    }
+  ];
   # Use the extlinux boot loader. (NixOS wants to enable GRUB by default)
   boot.loader.grub.enable = false;
   # Enables the generation of /boot/extlinux/extlinux.conf
