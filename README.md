@@ -24,7 +24,6 @@ First install nix as explained [here](https://nixos.org/download.html#download-n
 ```bash
 $ sh <(curl -L https://nixos.org/nix/install) --daemon
 ```
-Since we use the experimental (but great) flake feature, you need to [enable flake](https://nixos.wiki/wiki/Flakes#Enable_flakes) or to add to all commands `--experimental-features 'nix-command flakes'`.
 
 ### Start a virtual machine for the website
 To test the raspberry pi system (that basically starts an OS with a navigator that connects to the https://foosball.cwi.nl/ url) you just need to run:
@@ -52,16 +51,13 @@ Once you booted into NixOs, it's time to install this project. For a normal inst
 ```
 $ sudo su
 # cd /etc/nixos
-# nix-shell -p git
+# nix-shell -p git # if error see below
 # git clone https://github.com/cwi-foosball/foosball
 ```
 
-It should create a folder `/etc/nixos/foosball`. To switch your system to this configuration, just do (from any folder):
-```
-# nixos-rebuild switch --experimental-features 'nix-command flakes' --flake /etc/nixos/foosball#foosballrasp 
-```
+If you get an error about missing SSL certificates (and/or if it tries to build git from scratch) it is certainly because the system time is wrong (the clock is reset at each reboot on a raspberry pi). You can check the current date with `date` and change it with `date --set="20221231 05:30"` for the December 31 in 2022 at 05:30 (of course adapte the date).
 
-This configuration should enable flake for next time automatically, so you can run next time only:
+It should create a folder `/etc/nixos/foosball`. To switch your system to this configuration, just do:
 ```
 # nixos-rebuild switch --flake /etc/nixos/foosball#foosballrasp 
 ```
