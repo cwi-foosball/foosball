@@ -4,7 +4,7 @@
   # To easily generate a derivation per architecture
   inputs.flake-utils.url = "github:numtide/flake-utils";
   
-  outputs = { self, nixpkgs, flake-utils }: flake-utils.lib.eachDefaultSystem (system:
+  outputs = { self, nixpkgs, flake-utils }@attrs: flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
     in
@@ -17,10 +17,10 @@
           name = "run-nixos-vm";
           runtimeInputs = [ pkgs.virt-viewer ];
           text = ''
-            ${self.packages.${system}.nixosConfigurations.foosballrasp.config.system.build.vm}/bin/run-nixos-vm &
+            ${self.packages.${system}.nixosConfigurations.foosballrasp.config.system.build.vm}/bin/run-nixos-vm & PID_QEMU="$!"
             sleep 1 # I think some tools have an option to wait like -w
             remote-viewer spice://127.0.0.1:5930
-            kill $PID_QEMU
+            kill "$PID_QEMU"
           '';
         };
         
@@ -33,7 +33,7 @@
           ## $ ./result/bin/run-nixos-vm
           foosballrasp = nixpkgs.lib.nixosSystem {
             system = system; # flake needs to know the architecture of the OS
-            
+            specialArgs = attrs;
             modules = [
               # "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
               ./hardware-configuration.nix
@@ -42,7 +42,7 @@
               ./config_system_generic.nix
               ./config_system_x11.nix
               ./config_xfce.nix
-            ] + nixpkgs.lib.optional (config ? virtualisation.qemu) "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix";
+            ];
           };
         
           ## This may be useful in case you are lacking space to install a new system
