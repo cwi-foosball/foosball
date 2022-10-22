@@ -1,13 +1,23 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 {
   ### This file contains the configuration that most OS (server, frontend…) should share
   # The goal is to configure as much things as possible in this repository, to do minimal changes on the computer
   # See the README.md file to get an introduction on Nix/NixOs
 
   # For nice integration with the qemu virtual machine
-  # virtualisation.qemu.guestAgent = true;
-  # services.qemuGuest.enable = true;
-  # services.spice-vdagentd.enable = true;
+  #virtualisation.qemu.guestAgent.enable = true;
+  imports = [ "${inputs.nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix" ];
+  services.qemuGuest.enable = true;
+  virtualisation.qemu.options = lib.mkIf (config ? virtualisation.qemu) [
+    "-vga qxl -device virtio-serial-pci -spice port=5930,disable-ticketing=on -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent"
+
+    # To use, first start qemu, it will "hang", in fact in just waits for a client to connect and display the
+    # VM.
+    # Then run: remote-viewer spice://127.0.0.1:5930
+    # https://unix.stackexchange.com/questions/526849/qemu-kvm-using-virt-viewer-vs-remote-viewer
+    #"-display spice-app"
+  ];
+  services.spice-vdagentd.enable = true;
   
   # Ensure /tmp is cleared when restarting the computer
   # boot.cleanTmpDir = builtins.trace (config.virtualisation.qemu.guestAgent) true;

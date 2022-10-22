@@ -13,6 +13,17 @@
         packages.hello = pkgs.hello;
         packages.default = pkgs.hello;
 
+        packages.foosballrasp-with-vm-integration = pkgs.writeShellApplication {
+          name = "run-nixos-vm";
+          runtimeInputs = [ pkgs.virt-viewer ];
+          text = ''
+            ${self.packages.${system}.nixosConfigurations.foosballrasp.config.system.build.vm}/bin/run-nixos-vm &
+            sleep 1 # I think some tools have an option to wait like -w
+            remote-viewer spice://127.0.0.1:5930
+            kill $PID_QEMU
+          '';
+        };
+        
         packages.nixosConfigurations = {
           ## This is the main configuration for the computer in the foosball room (nixos)
           ## Install it with:
@@ -24,13 +35,14 @@
             system = system; # flake needs to know the architecture of the OS
             
             modules = [
+              # "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
               ./hardware-configuration.nix
               ./config_rasp_3B.nix
               ./config_login_rasp.nix
               ./config_system_generic.nix
               ./config_system_x11.nix
               ./config_xfce.nix
-            ];
+            ] + nixpkgs.lib.optional (config ? virtualisation.qemu) "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix";
           };
         
           ## This may be useful in case you are lacking space to install a new system

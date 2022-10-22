@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# The command to switch is not long… but this is even quicker to type!
+# The command to switch is not long… but this is even quicker to type and does some additional safety checks!
+
+# stop script if error
+set -e
 
 # Go to the flake folder
 cd -- "$( dirname -- "${BASH_SOURCE[0]}" )"
