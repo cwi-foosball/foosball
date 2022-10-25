@@ -1,4 +1,4 @@
-{ config, lib, pkgs, nixpkgs, ... }:
+{ config, lib, pkgs, ... }:
 {
   ### This file contains the configuration that most OS (server, frontend…) should share
   # The goal is to configure as much things as possible in this repository, to do minimal changes on the computer
@@ -6,7 +6,7 @@
 
   # For nice integration with the qemu virtual machine
   #virtualisation.qemu.guestAgent.enable = true;
-  imports = [ "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix" ];
+  # imports = [ "${modulePath}/virtualisation/qemu-vm.nix" ];
   services.qemuGuest.enable = true;
   virtualisation.qemu.options = lib.mkIf (config ? virtualisation.qemu) [
     "-vga qxl -device virtio-serial-pci -spice port=5930,disable-ticketing=on -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent"
