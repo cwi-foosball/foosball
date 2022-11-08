@@ -13,7 +13,6 @@
     let
       nixosConfigWithVM = nixpkgs.lib.nixosSystem {
         system = system; # flake needs to know the architecture of the OS
-        # specialArgs = attrs; # One module needs access to nixpkgs to import qemu stuff (actually maybe not even necessary)
         modules = myModules ++ myModulesInVm ++ [
           "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix" # Not compatible with non-vm machines
           nixosConfig

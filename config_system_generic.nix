@@ -6,15 +6,17 @@
 
   # For nice integration with the qemu virtual machine
   services.qemuGuest.enable = lib.mkIf (config ? virtualisation.qemu) true;
-  virtualisation.qemu.options = lib.mkIf (config ? virtualisation.qemu) [
-    "-vga qxl -device virtio-serial-pci -spice port=5930,disable-ticketing=on -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent"
-
-    # To use, first start qemu, it will "hang", in fact in just waits for a client to connect and display the
-    # VM.
-    # Then run: remote-viewer spice://127.0.0.1:5930
-    # https://unix.stackexchange.com/questions/526849/qemu-kvm-using-virt-viewer-vs-remote-viewer
-    #"-display spice-app"
-  ];
+  virtualisation =
+    # mkIf fails here because it "pushes" the condition to the leaves life `virtualisation.qemu = if …` to avoid
+    # an infinite recursion… but then it fails because this item does not exist.
+    if (config ? virtualisation.qemu) then {
+      qemu.options = [
+        # To use, first start qemu, it will "hang", in fact in just waits for a client to connect and display the
+        # VM. Then run: remote-viewer spice://127.0.0.1:5930
+        # https://unix.stackexchange.com/questions/526849/qemu-kvm-using-virt-viewer-vs-remote-viewer
+        "-vga qxl -device virtio-serial-pci -spice port=5930,disable-ticketing=on -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent"
+      ];
+    } else {};
   services.spice-vdagentd.enable = lib.mkIf (config ? virtualisation.qemu) true;
   
   # Ensure /tmp is cleared when restarting the computer

@@ -39,7 +39,7 @@
       startFoosball = pkgs.makeDesktopItem {
         name = "foosball";
         desktopName = "Foosball!";
-        exec = "chromium --start-fullscreen https://foosball.cwi.nl";
+        exec = "chromium --start-fullscreen ${config.services.CWIFoosballKiosk.kiosk.urlServer}";
         icon = let icon = ./images/foosball.png; in "${icon}";
       };
       # And autostart it!

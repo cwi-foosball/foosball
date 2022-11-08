@@ -3,8 +3,15 @@
 
   # To easily generate a derivation per architecture
   inputs.flake-utils.url = "github:numtide/flake-utils";
+  # The web server
+  inputs.cwi-foosball-web.url = "github:cwi-foosball/foosball-web";
   
-  outputs = { self, nixpkgs, flake-utils }@attrs: flake-utils.lib.eachDefaultSystem (system:
+  outputs = { self, nixpkgs, flake-utils, cwi-foosball-web }@attrs: {
+    # We create a new module that can be used in existing NixOs systems.
+    nixosModules.cwi-foosball-kiosk = {...}: {
+      imports = [ ./foosballKiosk.nix ];
+    };
+  } // flake-utils.lib.eachDefaultSystem (system:
     let
       
       pkgs = nixpkgs.legacyPackages.${system};
@@ -15,31 +22,80 @@
       # Can't use // to merge as it does not recursively merge stuff like a.b = … and a.c = …
       # recursiveUpdate only works on 2 items so let's make it work on lists:
       lib.foldl lib.recursiveUpdate {} [
-        {
-          # You can install these modules individually if you want to integrate this to an existing NixOs install
-          # Otherwise just use the functions we provide.
-          nixosModules.hardware-configuration-rasp3b = ./hardware-configuration.nix;
-          nixosModules.config_rasp_3B = ./config_rasp_3B.nix;
-          nixosModules.config_login_rasp = ./config_login_rasp.nix;
-          nixosModules.config_system_generic = ./config_system_generic.nix;
-          nixosModules.config_system_x11 = ./config_system_x11.nix;
-          nixosModules.config_xfce = ./config_xfce.nix;
-        }
         ## This is the main configuration for the computer in the foosball room (nixos)
         ## Install it with:
         ## $ sudo nixos-rebuild switch --flake .#foosballrasp
         ## and test it on your laptop (it starts a qemu VM) with:
-        ## $ sudo nixos-rebuild build-vm --flake .#foosballrasp
+        ## $ nix build .#foosballrasp-vm
         ## $ ./result/bin/run-nixos-vm
+        ## It has no server, and uses https://foosball.cwi.nl
         (mkNixosConfigAndIntegratedVm {
           name = "foosballrasp";
           myModules = [
             ./hardware-configuration.nix
-            ./config_rasp_3B.nix
-            ./config_login_rasp.nix
-            ./config_system_generic.nix
-            ./config_system_x11.nix
-            ./config_xfce.nix
+            self.nixosModules.cwi-foosball-kiosk
+            cwi-foosball-web.nixosModule.default
+            {
+              # Enable the "kiosk" (chromium stuff)
+              services.CWIFoosballKiosk = {
+                enableEverything = true;
+                kiosk.urlServer = "https://foosball.cwi.nl";
+              };
+            }
+          ];
+        })
+        ## This is the main configuration for the computer in the foosball room (nixos)
+        ## Install it with:
+        ## $ sudo nixos-rebuild switch --flake .#foosballrasp-extern-api-
+        ## and test it on your laptop (it starts a qemu VM) with:
+        ## $ nix build .#foosballrasp-extern-api-vm
+        ## $ ./result/bin/run-nixos-vm
+        ## It has a server, but uses the external api at https://foosball.cwi.nl
+        (mkNixosConfigAndIntegratedVm {
+          name = "foosballrasp-extern-api";
+          myModules = [
+            ./hardware-configuration.nix
+            self.nixosModules.cwi-foosball-kiosk
+            cwi-foosball-web.nixosModule.default
+            {
+              # Enable the "kiosk" (chromium stuff)
+              services.CWIFoosballKiosk = {
+                enableEverything = true;
+                kiosk.urlServer = "localhost";
+              };
+              # Enable a local web server using the web server of foosball.cwi.nl
+              # (can't get access to foosball.cwi.nl)
+              services.CWIFoosballWeb = {
+                enable = true;
+                domainAPI = "https://foosball.cwi.nl";
+              };
+            }
+          ];
+        })
+        ## This configuration is like the above one except that the full server (database/api/frontend…) is
+        ## installed locally.
+        ## Install it with:
+        ## $ sudo nixos-rebuild switch --flake .#foosballrasp-with-api
+        ## and test it on your laptop (it starts a qemu VM) with:
+        ## $ nix build .#foosballrasp-with-api-vm
+        ## $ ./result/bin/run-nixos-vm
+        (mkNixosConfigAndIntegratedVm {
+          name = "foosballrasp-with-api";
+          myModules = [
+            ./hardware-configuration.nix
+            self.nixosModules.cwi-foosball-kiosk
+            cwi-foosball-web.nixosModule.default
+            {
+              # Enable the "kiosk" (chromium stuff)
+              services.CWIFoosballKiosk = {
+                enableEverything = true;
+                kiosk.urlServer = "localhost";
+              };
+              # Enable a local web server with the database and everything
+              services.CWIFoosball = {
+                enable = true;
+              };
+            }
           ];
         })
         ## This minimalist image may be useful in case you are lacking space to install a new system
@@ -61,9 +117,14 @@
         (mkNixosConfigAndIntegratedVm {
           name = "minimalist";
           myModules = [
-            ./config_rasp_3B.nix
-            ./config_login_rasp.nix
-            ./config_system_generic.nix
+            self.nixosModules.cwi-foosball-kiosk
+            {
+              services.CWIFoosballKiosk = {
+                rasp3b.enable = true;
+                login.enable = true;
+                genericSystem.enable = true;
+              };
+            }
           ];
         })
       ]

@@ -29,13 +29,14 @@ $ sh <(curl -L https://nixos.org/nix/install) --daemon
 To test the raspberry pi system (that basically starts an OS with a navigator that connects to the https://foosball.cwi.nl/ url) you just need to run:
 
 ```bash
-$ nixos-rebuild build-vm --flake .#foosballrasp
+$ nix build --flake .#foosballrasp-vm
+$ rm -f nixos.qcow2 # Remove state from previous runs (sometimes it creates inconsistencies when we build a new derivation)
 $ ./result/bin/run-nixos-vm
 ```
 
 and it will start a qemu with the full OS running! Quite practical to do tests without having any raspberry pi ;-)
 
-Note that a file `.*qcow2` is created when running the VM to keep its state. You can remove it if you want to remove the state of the VW.
+Note that a file `.*qcow2` is created when running the VM to keep its state. You can keep it if you want to kremove the state of the VW.
 
 ### Install on a raspberry pi
 
@@ -47,7 +48,16 @@ Here is what I did exactly to install NixOs:
 - Plug your sd card, use lsblk on linux to find its name and run: `sudo dd if=nixos-sd-image-22.05.3702.c5203abb132-aarch64-linux.img of=/dev/mmcblk0 bs=4M && sync` (make sure to change the names depending on your case)
 - Put the card back into the raspberry pi, plug the screen/power and start it. If the card does not boot, you may need to [update manually](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#updating-the-bootloader) the firmware. Also, the version 4 sometimes seem to output the first part of the boot of one hdmi output and the second part the other hdmi output. 
 
-Once you booted into NixOs, it's time to install this project. For a normal install you would just go in `/etc/nixos/configuration.nix` and run `sudo nixos-generate-config` to generate the `hardware-configuration.nix` file, that depends on your hardware (and it's actually what I did the first time to get the content of `hardware-configuration.nix` present in this repo, that I just copied using the SD card on my computer). However since I already included this file in the current project you don't need to run this command (unless you have a different hardware than mine). Instead, clone/copy this repo in `/etc/nixos`. You can either copy this folder from your computer on the SD card directly (to turn off the raspberry pi do `poweroff`), or run directly from the raspberry pi:
+Once you booted into NixOs, it's time to install this project. Unfortunately, NixOs can take quite a lot of RAM to evaluate nixpkgs (some people [reported 1.3G](https://github.com/bennofs/nix-index/issues/64), sometimes more), and the raspberri pi has only 1G of RAM. As a result, the system will randomly hang at some points, without any error. The simplest solution is to add a swapfile (automatically configured after the first install).
+```
+$ sudo fallocate -l 2G /swapfile
+$ sudo chmod 600 /swapfile
+$ sudo mkswap /swapfile
+$ sudo swapon /swapfile
+```
+You can verify the amount of free RAM using `sudo free -h` or `sudo swapon`. Other solutions could involve building directly on the laptop, either using the raspberry as a remote builder or using `binfmt` to fake an Aarch64 system or cross-compiling (yeah NixOs makes it a breaze)… but it is not really practical in my opinion.
+
+Usually for a normal install you would just go in `/etc/nixos/configuration.nix` and run `sudo nixos-generate-config` to generate the `hardware-configuration.nix` file, that depends on your hardware (and it's actually what I did the first time to get the content of `hardware-configuration.nix` present in this repo, that I just copied using the SD card on my computer). However since I already included this file in the current project you don't need to run this command (unless you have a different hardware than mine). Instead, clone/copy this repo in `/etc/nixos`. You can either copy this folder from your computer on the SD card directly (to turn off the raspberry pi do `poweroff`), or run directly from the raspberry pi:
 ```
 $ sudo su
 # cd /etc/nixos
@@ -55,7 +65,7 @@ $ sudo su
 # git clone https://github.com/cwi-foosball/foosball
 ```
 
-If you get an error about missing SSL certificates (and/or if it tries to build git from scratch) it is certainly because the system time is wrong (the clock is reset at each reboot on a raspberry pi). You can check the current date with `date` and change it with `date --set="20221231 05:30"` for the December 31 in 2022 at 05:30 (of course adapte the date).
+If you get an error about missing SSL certificates (and/or if it tries to build git from scratch) it is certainly because the system time is wrong (the clock is reset at each reboot on a raspberry pi). You can check the current date with `date` and change it with `date --set="20221231 05:30"` for the December 31 in 2022 at 05:30 (of course adapt the date).
 
 It should create a folder `/etc/nixos/foosball`. To switch your system to this configuration, just do:
 ```

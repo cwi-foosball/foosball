@@ -8,7 +8,7 @@
     {
       device = "/swapfile";
       # create a smaller file on qemu, just to test
-      size = if (config ? virtualisation.qemu) then 127 else 1024;
+      size = if (config ? virtualisation.qemu) then 127 else 2048;
     }
   ];
   # Use the extlinux boot loader. (NixOS wants to enable GRUB by default)
