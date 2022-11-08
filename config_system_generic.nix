@@ -5,9 +5,7 @@
   # See the README.md file to get an introduction on Nix/NixOs
 
   # For nice integration with the qemu virtual machine
-  #virtualisation.qemu.guestAgent.enable = true;
-  # imports = [ "${modulePath}/virtualisation/qemu-vm.nix" ];
-  services.qemuGuest.enable = true;
+  services.qemuGuest.enable = lib.mkIf (config ? virtualisation.qemu) true;
   virtualisation.qemu.options = lib.mkIf (config ? virtualisation.qemu) [
     "-vga qxl -device virtio-serial-pci -spice port=5930,disable-ticketing=on -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent"
 
@@ -17,7 +15,7 @@
     # https://unix.stackexchange.com/questions/526849/qemu-kvm-using-virt-viewer-vs-remote-viewer
     #"-display spice-app"
   ];
-  services.spice-vdagentd.enable = true;
+  services.spice-vdagentd.enable = lib.mkIf (config ? virtualisation.qemu) true;
   
   # Ensure /tmp is cleared when restarting the computer
   # boot.cleanTmpDir = builtins.trace (config.virtualisation.qemu.guestAgent) true;
