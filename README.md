@@ -36,7 +36,10 @@ $ ./result/bin/run-nixos-vm
 
 and it will start a qemu with the full OS running! Quite practical to do tests without having any raspberry pi ;-)
 
-Note that a file `.*qcow2` is created when running the VM to keep its state. You can keep it if you want to kremove the state of the VW.
+Note that a file `.*qcow2` is created when running the VM to keep its state. You can keep it if you want to remove the state of the VW.
+
+Note that for now, `foosballrasp-vm` uses an external server hosted at https://foosball.cwi.nl (so you need a vpn to access it if you are outside of the building). If you want to create an independent instance, you can use `foosballrasp-with-api-vm` instead to build a full website with the database, and `foosballrasp-extern-api-vm` if you want to use a local frontend but use the backend of https://foosball.cwi.nl (useful to share the same database but get a more recent GUI).
+
 
 ### Install on a raspberry pi
 
@@ -72,10 +75,4 @@ It should create a folder `/etc/nixos/foosball`. To switch your system to this c
 # nixos-rebuild switch --flake /etc/nixos/foosball#foosballrasp 
 ```
 
-
-## Todo
-
-- add desktop entry on desktop
-- better qemu integration
-- create flake for website
-- add separate modules for modular installations
+Note that for now, `foosballrasp` uses an external server hosted at https://foosball.cwi.nl (so you need a vpn to access it if you are outside of the building). If you want to create an independent instance, you can use `foosballrasp-with-api` instead to build a full website with the database, and `foosballrasp-extern-api` if you want to use a local frontend but use the backend of https://foosball.cwi.nl (useful to share the same database but get a more recent GUI).
