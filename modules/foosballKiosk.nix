@@ -57,11 +57,11 @@ with lib;
           lxqt.enable = true;
         };
       })
-      (mkIf cfg.rasp3b.enable (import ./config_rasp_3B.nix {inherit config lib pkgs;}))
-      (mkIf cfg.login.enable (import ./config_login_rasp.nix {inherit config lib pkgs;}))
-      (mkIf cfg.genericSystem.enable (import ./config_system_generic.nix {inherit config lib pkgs;}))
-      (mkIf cfg.kiosk.enable (import ./config_kiosk.nix {inherit config lib pkgs;}))
-      (mkIf cfg.xfce.enable (import ./config_xfce.nix {inherit config lib pkgs;}))
-      (mkIf cfg.lxqt.enable (import ./config_lxqt.nix {inherit config lib pkgs;}))
+      (mkIf cfg.rasp3b.enable (import ./submodules/config_rasp_3B.nix {inherit config lib pkgs;}))
+      (mkIf cfg.login.enable (import ./submodules/config_login_rasp.nix {inherit config lib pkgs;}))
+      (mkIf cfg.genericSystem.enable (import ./submodules/config_system_generic.nix {inherit config lib pkgs;}))
+      (mkIf cfg.kiosk.enable (import ./submodules/config_kiosk.nix {inherit config lib pkgs;}))
+      (mkIf cfg.xfce.enable (import ./submodules/config_xfce.nix {inherit config lib pkgs;}))
+      (mkIf cfg.lxqt.enable (import ./submodules/config_lxqt.nix {inherit config lib pkgs;}))
     ];
 }

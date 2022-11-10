@@ -11,7 +11,7 @@
   outputs = { self, nixpkgs, flake-utils, cwi-foosball-web }@attrs: {
     # We create a new module that can be used in existing NixOs systems.
     nixosModules.cwi-foosball-kiosk = {...}: {
-      imports = [ ./foosballKiosk.nix ];
+      imports = [ ./modules/foosballKiosk.nix ];
     };
     # build using nix build .#nixosConfigurations.lxqtSdcard.config.system.build.sdImage
     nixosConfigurations.lxqtSdcard = nixpkgs.lib.nixosSystem {
@@ -81,7 +81,7 @@
       pkgs = nixpkgs.legacyPackages.${system};
       lib = nixpkgs.lib;
       ## This is a function to create 3 configurations:
-      mkNixosConfigAndIntegratedVm = import ./mkNixosConfigAndIntegratedVm.nix { inherit nixpkgs system pkgs; };
+      mkNixosConfigAndIntegratedVm = import ./lib/mkNixosConfigAndIntegratedVm.nix { inherit nixpkgs system pkgs; };
     in
       # Can't use // to merge as it does not recursively merge stuff like a.b = … and a.c = …
       # recursiveUpdate only works on 2 items so let's make it work on lists:

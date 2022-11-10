@@ -31,7 +31,7 @@ fi
 # Build the configuration
 #nixos-rebuild build-vm --flake .#foosballrasp --show-trace
 # The new version uses spice for clipboard interaction
-nix build .#foosballrasp-with-vm-integration
+nix build .#foosballrasp-vm
 # Start the VM
 echo "We start the VM"
 ./result/bin/run-nixos-vm

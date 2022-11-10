@@ -10,9 +10,9 @@ let
 in
 {  
   imports = [
-    ./hardware-configuration.nix
-    ./foosballKiosk.nix
-    (cwiFoosballWeb + "/foosballModule.nix")
+    ./hardware-configuration.nix             # Hardware
+    ./modules/foosballKiosk.nix              # Custom module created for the kiosk (chromium stuff)
+    (cwiFoosballWeb + "/foosballModule.nix") # External module (imported just above) to setup the web server
   ];
   # Enable the "kiosk" (chromium stuff)
   services.CWIFoosballKiosk = {
