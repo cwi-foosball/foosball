@@ -53,8 +53,17 @@
     # unzip
     inetutils
     # jq        # For displaying json nicely, can be practical to debug
-    
-  ] ++ # The best editor
+    ## I use bepo… and it's super annoying to change to bepo everytime. Let's install a script for that
+    (pkgs.writeShellApplication {
+      name = "bepo";
+      text = ''
+        if tty | grep tty -q; then
+          loadkeys fr-bepo
+        else
+          setxkbmap fr bepo -option ctrl:swapcaps
+        fi
+      '';})
+    ] ++ # The best editor
   (if config.services.CWIFoosballKiosk.genericSystem.noGui then [ emacs-nw ] else [ emacs ]);
 
   nix = {

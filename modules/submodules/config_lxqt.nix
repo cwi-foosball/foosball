@@ -16,16 +16,19 @@
       };
     };
   };
-  ######### Configuration
-  # Default configuration for Lxqt. You can also get new setting by creating a git repository in .config to
+  
+  ######### Configuration and theme
+  # Nicer configuration for Lxqt. You can also learn new setting by creating a git repository in .config to
   # see what changes when you graphically change something.
   environment.etc = {
-    # Theme plasma for the widgets
+    # Theme plasma for the widgets, and noto font looks much more modern
     "xdg/lxqt/lxqt.conf".text =
       ''
         [General]
         icon_follow_color_scheme=true
         theme=KDE-Plasma
+        [Qt]
+        font="Noto Sans,11,-1,5,50,0,0,0,0,0"
       '';
     "xdg/lxqt/panel.conf".text = ''
       [quicklaunch]
@@ -35,21 +38,23 @@
       apps\size=2
       type=quicklaunch
     '';
-  }; 
+    # Nicer cursor
+    "xdg/lxqt/session.conf".text = ''
+      [Mouse]
+      cursor_theme=Vimix
+    '';
+
+  };
+  fonts.fonts = with pkgs; [
+    noto-fonts
+  ];  
   # Default configuration for Openbox (default WM).
   environment.etc = {
     # Openbox theme. Warning this applies only for new users as if the user has an rc.xml file the system one is
     # not used… and this file is created at startup. Mistral will be install below.
-    "xdg/openbox/rc.xml".text =
-      ''
-        <?xml version="1.0" encoding="UTF-8"?>
-        <openbox_config xmlns="http://openbox.org/3.4/rc" xmlns:xi="http://www.w3.org/2001/XInclude">
-          <theme>
-            <name>Mistral</name>
-          </theme>
-        </openbox_config>
-      '';
-  }; 
+    "xdg/openbox/rc.xml".source = ./themes/config_openbox_rc.xml;
+  };
+  
   ######### Install themes
   # Configurations and theming
   # We will keep things simple, but some great themes are:
@@ -66,7 +71,18 @@
           tar xf "$src" -C $out/share/themes/
         '';
       };
+      # Theme for cursor https://www.gnome-look.org/p/1358330
+      # see also https://www.gnome-look.org/p/1393084
+      vimix_cursor = pkgs.stdenv.mkDerivation {
+        name = "vimix";
+        src = ./themes/01-Vimix-cursors.tar.xz;
+        installPhase = ''
+          mkdir -p $out/share/icons/Vimix
+          cp -r * $out/share/icons/Vimix
+        '';
+      };
     in [
       mistralTheme
+      vimix_cursor
     ];
 }

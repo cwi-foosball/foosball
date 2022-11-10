@@ -24,9 +24,11 @@ cd -- "$( dirname -- "${BASH_SOURCE[0]}" )"
 
 echo "Let's try to run the config in a VM!"
 
-# To always start with a fresh system
+# To always start with a fresh system (strange bugs can arrive otherwise if you build different systems
+# with same disk overlay)
 if [ "$keep_data" = false ]; then
-    rm -f nixos.qemu
+    echo "Removing nixos.qcow2"
+    rm -f nixos.qcow2
 fi
 # Build the configuration
 #nixos-rebuild build-vm --flake .#foosballrasp --show-trace
