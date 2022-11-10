@@ -38,12 +38,6 @@
       apps\size=2
       type=quicklaunch
     '';
-    # Nicer cursor
-    "xdg/lxqt/session.conf".text = ''
-      [Mouse]
-      cursor_theme=Vimix
-    '';
-
   };
   fonts.fonts = with pkgs; [
     noto-fonts
@@ -71,18 +65,28 @@
           tar xf "$src" -C $out/share/themes/
         '';
       };
-      # Theme for cursor https://www.gnome-look.org/p/1358330
-      # see also https://www.gnome-look.org/p/1393084
+      # Theme for cursor https://www.gnome-look.org/p/1393084
+      # see also  https://www.gnome-look.org/p/1358330
       vimix_cursor = pkgs.stdenv.mkDerivation {
         name = "vimix";
-        src = ./themes/01-Vimix-cursors.tar.xz;
+        src = ./themes/Sweet-cursors.tar.xz;
         installPhase = ''
-          mkdir -p $out/share/icons/Vimix
-          cp -r * $out/share/icons/Vimix
+          mkdir -p $out/share/icons/Sweet-cursors
+          cp -r * $out/share/icons/Sweet-cursors
+        '';
+      };
+      # https://wiki.archlinux.org/title/Cursor_themes
+      defaultCursor = pkgs.writeTextFile {
+        name = "default-cursor";
+        destination = "/share/icons/default/index.theme";
+        text = ''
+          [icon theme] 
+          Inherits=Sweet-cursors
         '';
       };
     in [
       mistralTheme
       vimix_cursor
+      defaultCursor
     ];
 }
