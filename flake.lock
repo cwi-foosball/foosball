@@ -6,11 +6,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1667914330,
-        "narHash": "sha256-D2dYbR9niN4sVTk9Ai/FfOzponcQR6fcwEStg6UX0FI=",
+        "lastModified": 1668101882,
+        "narHash": "sha256-6z9/Xp+vQwecqD6KnXW6O2E7fxW5nfMItZB6cYi4chk=",
         "owner": "cwi-foosball",
         "repo": "foosball-web",
-        "rev": "1008b34e3efe9abac80308f4ac21b22bc5fe2cf8",
+        "rev": "fef12114c9ef0cf67bc7e367ff3f7f4166455f78",
         "type": "github"
       },
       "original": {
