@@ -41,6 +41,7 @@
   environment.systemPackages = with pkgs; [
     ### Basic utilities
     wget
+    ripgrep
     curl
     htop      # list processes
     git
