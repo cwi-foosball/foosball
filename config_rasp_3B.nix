@@ -22,7 +22,7 @@
   # Otherwise the hdmi disconnects during the boot and reconnect at the end
   # looks like it is still not enough...
   # Don't enable it with qemu
-  boot.initrd.kernelModules = lib.mkIf (!(config ? virtualisation.qemu)) [ "vc4" "bcm2835_dma" "i2c_bcm2835" ];
+  boot.initrd.kernelModules = lib.mkIf (!(config ? virtualisation.qemu)) [ "vc4" "bcm2835_dma" "i2c_bcm2835" "ahci"];
   
   # Apparently needed for audio (dtparam), 
   # TODO: with older mainline kernels cpu frequency scaling was not supported. Not sure what is the status now.
@@ -32,18 +32,29 @@
     force_turbo=1
   '';
   
-  # I get some errors, maybe I should use the rpi3 kernel instead of the mainline one… but
   # K900 said that I should always try to stay as much as possible on mainline… which makes sense.
   # K900 also recommended to use kernel 6.0.2 (default is 5.*),
   boot.kernelPackages = pkgs.linuxPackages_latest;
+  # also get errors on rpi3 (can't boot, kernel error) and it will not work in qemu since it's arm
+  # boot.kernelPackages = pkgs.linuxPackages_rpi3;
 
+  
+  # https://github.com/NixOS/nixpkgs/issues/154163#issuecomment-1008362877
+  nixpkgs.overlays = [
+    (final: super: {
+      makeModulesClosure = x:
+        super.makeModulesClosure (x // { allowMissing = true; });
+    })
+  ];
+  
   # Needed for the virtual console to work on the RPi 3, as the default of 16M
   # doesn't seem to be enough. If X.org behaves weirdly (I only saw the cursor)
   # then try increasing this to 256M.
   # https://labs.quansight.org/blog/2020/07/nixos-rpi-wifi-router
   # On some kernels (not sure if it is fixed on 6.0.2) this parameter has priority lower than the deviceTree
   # so if it fails below how to change the device tree
-  boot.kernelParams = ["cma=256M"];
+  boot.kernelParams = [ "cma=256M" "console=tty0" ];
+  # boot.kernelParams = [ "cma=256M" ];
 
   ## This is supposed to do somethink like above, but with higher priority (and different numbers)
   # somehow related, not sure how

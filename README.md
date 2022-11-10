@@ -48,10 +48,10 @@ To install the OS on a raspberry pi, you need to follow the generic instructions
 Here is what I did exactly to install NixOs:
 - Download the image from https://hydra.nixos.org/build/195908591
 - Uncompress the image (just used the graphical ark extractor from Dolphin but you can also use `unzstd -d`)
-- Plug your sd card, use lsblk on linux to find its name and run: `sudo dd if=nixos-sd-image-22.05.3702.c5203abb132-aarch64-linux.img of=/dev/mmcblk0 bs=4M && sync` (make sure to change the names depending on your case)
+- Plug your sd card (at least 16Go, the system + 2G of swap takes 8.5G), use lsblk on linux to find its name and run: `sudo dd if=nixos-sd-image-22.05.3702.c5203abb132-aarch64-linux.img of=/dev/mmcblk0 bs=4M && sync` (make sure to change the names depending on your case)
 - Put the card back into the raspberry pi, plug the screen/power and start it. If the card does not boot, you may need to [update manually](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#updating-the-bootloader) the firmware. Also, the version 4 sometimes seem to output the first part of the boot of one hdmi output and the second part the other hdmi output. 
 
-Once you booted into NixOs, it's time to install this project. Unfortunately, NixOs can take quite a lot of RAM to evaluate nixpkgs (some people [reported 1.3G](https://github.com/bennofs/nix-index/issues/64), sometimes more), and the raspberri pi has only 1G of RAM. As a result, the system will randomly hang at some points, without any error. The simplest solution is to add a swapfile (automatically configured after the first install).
+Once you booted into NixOs, it's time to install this project. Unfortunately, NixOs (or actually maybe flake as reported [here](https://github.com/NixOS/nix/issues/3121) and [here](https://github.com/NixOS/nix/pull/6530), I should try without the experimental flake feature) can take quite a lot of RAM to evaluate nixpkgs (some people [reported 1.3G](https://github.com/bennofs/nix-index/issues/64), sometimes more), and the raspberri pi has only 1G of RAM. As a result, the system will randomly hang at some points, without any error. The simplest solution is to add a swapfile (automatically configured after the first install).
 ```
 $ sudo fallocate -l 2G /swapfile
 $ sudo chmod 600 /swapfile
@@ -74,5 +74,7 @@ It should create a folder `/etc/nixos/foosball`. To switch your system to this c
 ```
 # nixos-rebuild switch --flake /etc/nixos/foosball#foosballrasp 
 ```
+(This can take a few minutes… the raspberry is not a fast system and NixOs consumes enough RAM during the nixpkgs evaluation that it will surely use the swap file extensively… which is really slow)
+
 
 Note that for now, `foosballrasp` uses an external server hosted at https://foosball.cwi.nl (so you need a vpn to access it if you are outside of the building). If you want to create an independent instance, you can use `foosballrasp-with-api` instead to build a full website with the database, and `foosballrasp-extern-api` if you want to use a local frontend but use the backend of https://foosball.cwi.nl (useful to share the same database but get a more recent GUI).

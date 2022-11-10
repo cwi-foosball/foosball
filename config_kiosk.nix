@@ -53,8 +53,13 @@
         gparted
 
         ### To display the foosball page
-        firefox
-        chromium
+        firefox # the website seems to fail with firefox
+        (chromium.override {
+          # https://github.com/NixOS/nixpkgs/issues/200497
+          commandLineArgs = [
+            "--use-gl=desktop"
+          ];
+        })
 
         ### Generic tools that might be useful
         pavucontrol # always practical to setup sound

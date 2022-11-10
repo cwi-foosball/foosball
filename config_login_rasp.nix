@@ -15,6 +15,12 @@
       "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDjQGQzn3+PxNGMdcw+uwFUMaQpqExnM2mkL3lyAjvc3ytyNfWIIVHqOh/s5PcPmjtGvUHtrPHi+6uFa0zIWJL2DLAGJ7t3Cy1yCStJsGyquxe1Th2X1h02mEL+yDKxfSYC8AWWpG/WoiwkIHhiMsmP5tNGtRikBZp8I0GxvNLbC0UpLZ5jHxrvxu6sKCxHerMt96wwJng7NI/YwfdZd8Z/fuCOYwqIgf/d0El0nMZjYCtn0b5s87c3EI6+ViYm0z9XyD5tLiXJleF8odTS6YkrFZpgkO4yoqPJPkuudMDuozx2iFVcamR1B8YLNOVLV/BupnoMULN80y+EyAa1x5hO0QLr22lk6zoCWmkfDz5lhvriyW5mLxD1TTo94aabhS8tGMoR1f1kuy5/GtT/rn0GO03fcTjRQP2c/uQeYwCwPTPQBwlVwidwAtd2Re8FWk0uYqKkvgV6GTit1AwYBiqQStZrzcbyov4vHzhOaNpcgslnF1Xmk7R2FMsH7zxEeBk= leo@bestos"
     ];
   };
+  users.users.root = {
+    # For ssh access
+    openssh.authorizedKeys.keys = [
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDjQGQzn3+PxNGMdcw+uwFUMaQpqExnM2mkL3lyAjvc3ytyNfWIIVHqOh/s5PcPmjtGvUHtrPHi+6uFa0zIWJL2DLAGJ7t3Cy1yCStJsGyquxe1Th2X1h02mEL+yDKxfSYC8AWWpG/WoiwkIHhiMsmP5tNGtRikBZp8I0GxvNLbC0UpLZ5jHxrvxu6sKCxHerMt96wwJng7NI/YwfdZd8Z/fuCOYwqIgf/d0El0nMZjYCtn0b5s87c3EI6+ViYm0z9XyD5tLiXJleF8odTS6YkrFZpgkO4yoqPJPkuudMDuozx2iFVcamR1B8YLNOVLV/BupnoMULN80y+EyAa1x5hO0QLr22lk6zoCWmkfDz5lhvriyW5mLxD1TTo94aabhS8tGMoR1f1kuy5/GtT/rn0GO03fcTjRQP2c/uQeYwCwPTPQBwlVwidwAtd2Re8FWk0uYqKkvgV6GTit1AwYBiqQStZrzcbyov4vHzhOaNpcgslnF1Xmk7R2FMsH7zxEeBk= leo@bestos"
+    ];
+  };
   # Enable the OpenSSH server.
   services.openssh = {
     enable = true;

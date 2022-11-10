@@ -15,6 +15,11 @@ with lib;
     };
     genericSystem = {
       enable = mkEnableOption "generic system.";
+      noGui = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Do not install GUI stuff";
+      };
     };
     kiosk = {
       enable = mkEnableOption "kiosk: stuff related to x11 and chromium package that start automatically.";
@@ -25,8 +30,12 @@ with lib;
         description = "Url of the server to open in the browser";
       };
     };
+    # lxqt is the default option (faster than xfce, itself faster than kde)
+    lxqt = {
+      enable = mkEnableOption "enable the lxqt desktop manager (seems faster than xfce).";
+    };
     xfce = {
-      enable = mkEnableOption "stuff related to xfce.";
+      enable = mkEnableOption "enable the xfce desktop manager.";
     };
   };
   
@@ -38,14 +47,14 @@ with lib;
     cfg = config.services.CWIFoosballKiosk;
   in 
     lib.mkMerge [
-      # If enableEverything is true… enable everything.
+      # If enableEverything is true… enable everything (except xfce, we use lxqt by default).
       (mkIf cfg.enableEverything {
         services.CWIFoosballKiosk = {
           rasp3b.enable = true;
           login.enable = true;
           genericSystem.enable = true;
           kiosk.enable = true;
-          xfce.enable = true;
+          lxqt.enable = true;
         };
       })
       (mkIf cfg.rasp3b.enable (import ./config_rasp_3B.nix {inherit config lib pkgs;}))
@@ -53,5 +62,6 @@ with lib;
       (mkIf cfg.genericSystem.enable (import ./config_system_generic.nix {inherit config lib pkgs;}))
       (mkIf cfg.kiosk.enable (import ./config_kiosk.nix {inherit config lib pkgs;}))
       (mkIf cfg.xfce.enable (import ./config_xfce.nix {inherit config lib pkgs;}))
+      (mkIf cfg.lxqt.enable (import ./config_lxqt.nix {inherit config lib pkgs;}))
     ];
 }

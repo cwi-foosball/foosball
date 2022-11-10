@@ -4,22 +4,15 @@
 # stop script if error
 set -e
 
-# Go to the flake folder
+# Go to the script folder (useful to have multiple configurations that you can enable in the same system)
 cd -- "$( dirname -- "${BASH_SOURCE[0]}" )"
 
-# Test the current folder to be sure we are on the raspberry pi (you don't want to override the system)
-if [ -d "/etc/nixos/foosball" ] 
-then
-    echo "You seem to be on the right machine"
-else
-    echo "WARNING: you seem to be on a different machine than the foosball one (can't find /etc/nixos/foosball)"
-    echo "This will reinstall the current system to turn it into a foosball client machine… is it what you want?"
-    read -p "Continue (y/n)? " choice
-    case "$choice" in 
-        y|Y ) echo "Ok it's your choice…";;
-        n|N ) exit 1;;
-        * ) exit 1;;
-    esac
-fi
-echo "Let's install the new system!"
-sudo nixos-rebuild switch --flake .#foosballrasp
+# We pin nixpkgs (flake consumes too much RAM for now on a raspberry pi)
+echo "## Downloading nixpkgs..."
+nixpkgs_with_quotes=$(nix-instantiate --eval --expr 'builtins.fetchTarball {
+    url = https://github.com/NixOS/nixpkgs/archive/667e5581d16745bcda791300ae7e2d73f49fff25.tar.gz;
+    sha256 = "";
+  }')
+# Remote the quotes:
+nixpkgs="${nixpkgs_with_quotes//\"}"
+sudo nixos-rebuild -I nixos-config=configuration.nix -I "nixpkgs=${nixpkgs}" switch

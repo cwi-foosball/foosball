@@ -45,18 +45,16 @@
     htop      # list processes
     git
     pciutils  # To have lspci:
-    zip
-    ark       # Extract files in dolphin
+    # zip
+    # ark       # Extract files in dolphin
     file
     nmap
-    unzip
+    # unzip
     inetutils
-    jq        # For displaying json nicely, can be practical to debug
+    # jq        # For displaying json nicely, can be practical to debug
     
-    ### For developping/debugging…
-    # The best editor
-    emacs 
-  ];
+  ] ++ # The best editor
+  (if config.services.CWIFoosballKiosk.genericSystem.noGui then [ emacs-nw ] else [ emacs ]);
 
   nix = {
     # Flake is experimental… but soo cool and quite stable already

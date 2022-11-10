@@ -1,6 +1,8 @@
 {
   description = "Configuration";
 
+  # nixpkgs follow unstable to get latest kernel
+  inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   # To easily generate a derivation per architecture
   inputs.flake-utils.url = "github:numtide/flake-utils";
   # The web server
@@ -10,6 +12,68 @@
     # We create a new module that can be used in existing NixOs systems.
     nixosModules.cwi-foosball-kiosk = {...}: {
       imports = [ ./foosballKiosk.nix ];
+    };
+    # build using nix build .#nixosConfigurations.lxqtSdcard.config.system.build.sdImage
+    nixosConfigurations.lxqtSdcard = nixpkgs.lib.nixosSystem {
+      system = "aarch64-linux";
+      modules = [
+        ({modulesPath, ...}: {
+          imports = [ (modulesPath + "/installer/sd-card/sd-image-aarch64.nix")];
+          # Do not compress the image as we want to use it straight away
+          sdImage.compressImage = false;
+        })
+        ({ pkgs, lib, ... }: {
+          boot.kernelPackages = pkgs.linuxPackages_latest;
+          # remove zfs
+          boot.supportedFilesystems = with lib; mkForce [ "btrfs" "reiserfs" "vfat" "f2fs" "xfs" "ntfs" "cifs" ];
+          boot.kernelParams = [ "cma=512M" ];
+          # Enable the X11 windowing system.
+          services.xserver = {
+            enable = true;
+            desktopManager.lxqt = {
+              enable = true;
+            };
+            displayManager = {
+              defaultSession = "lxqt";
+              autoLogin = {
+                enable = true;
+                user = "pi";
+              };
+            };
+          };
+
+          # XKB's configuration also applies in the console
+          console.useXkbConfig = true;
+
+          services.xserver.libinput = {
+            enable = true;
+          };
+          system.stateVersion = "22.11";
+          environment.systemPackages = with pkgs; [ chromium ];
+          users.users.pi = {
+            isNormalUser = true;
+            # In theory one should use hashedPassword but who care, the password is public anyway
+            password = "cwifoosball";
+            extraGroups = [ "wheel" "audio"  ]; # Enable ‘sudo’ for the user.
+            # For ssh access
+            openssh.authorizedKeys.keys = [
+              "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDjQGQzn3+PxNGMdcw+uwFUMaQpqExnM2mkL3lyAjvc3ytyNfWIIVHqOh/s5PcPmjtGvUHtrPHi+6uFa0zIWJL2DLAGJ7t3Cy1yCStJsGyquxe1Th2X1h02mEL+yDKxfSYC8AWWpG/WoiwkIHhiMsmP5tNGtRikBZp8I0GxvNLbC0UpLZ5jHxrvxu6sKCxHerMt96wwJng7NI/YwfdZd8Z/fuCOYwqIgf/d0El0nMZjYCtn0b5s87c3EI6+ViYm0z9XyD5tLiXJleF8odTS6YkrFZpgkO4yoqPJPkuudMDuozx2iFVcamR1B8YLNOVLV/BupnoMULN80y+EyAa1x5hO0QLr22lk6zoCWmkfDz5lhvriyW5mLxD1TTo94aabhS8tGMoR1f1kuy5/GtT/rn0GO03fcTjRQP2c/uQeYwCwPTPQBwlVwidwAtd2Re8FWk0uYqKkvgV6GTit1AwYBiqQStZrzcbyov4vHzhOaNpcgslnF1Xmk7R2FMsH7zxEeBk= leo@bestos"
+            ];
+          };
+          users.users.root = {
+            # For ssh access
+            openssh.authorizedKeys.keys = [
+              "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDjQGQzn3+PxNGMdcw+uwFUMaQpqExnM2mkL3lyAjvc3ytyNfWIIVHqOh/s5PcPmjtGvUHtrPHi+6uFa0zIWJL2DLAGJ7t3Cy1yCStJsGyquxe1Th2X1h02mEL+yDKxfSYC8AWWpG/WoiwkIHhiMsmP5tNGtRikBZp8I0GxvNLbC0UpLZ5jHxrvxu6sKCxHerMt96wwJng7NI/YwfdZd8Z/fuCOYwqIgf/d0El0nMZjYCtn0b5s87c3EI6+ViYm0z9XyD5tLiXJleF8odTS6YkrFZpgkO4yoqPJPkuudMDuozx2iFVcamR1B8YLNOVLV/BupnoMULN80y+EyAa1x5hO0QLr22lk6zoCWmkfDz5lhvriyW5mLxD1TTo94aabhS8tGMoR1f1kuy5/GtT/rn0GO03fcTjRQP2c/uQeYwCwPTPQBwlVwidwAtd2Re8FWk0uYqKkvgV6GTit1AwYBiqQStZrzcbyov4vHzhOaNpcgslnF1Xmk7R2FMsH7zxEeBk= leo@bestos"
+            ];
+          };
+          # Enable the OpenSSH server.
+          services.openssh = {
+            enable = true;
+            # Forbid password authentication (too much risks with a trivial password), use keys instead
+            passwordAuthentication = false;
+          };
+        })
+      ];
     };
   } // flake-utils.lib.eachDefaultSystem (system:
     let
@@ -25,12 +89,25 @@
         ## This is the main configuration for the computer in the foosball room (nixos)
         ## Install it with:
         ## $ sudo nixos-rebuild switch --flake .#foosballrasp
+        ## or without flake it seems to compile much faster on the rasp `sudo nixos-rebuild switch`
         ## and test it on your laptop (it starts a qemu VM) with:
         ## $ nix build .#foosballrasp-vm
         ## $ ./result/bin/run-nixos-vm
         ## It has no server, and uses https://foosball.cwi.nl
         (mkNixosConfigAndIntegratedVm {
           name = "foosballrasp";
+          myModules = [
+            ./configuration.nix
+          ];
+        })
+        ## Install it with:
+        ## $ sudo nixos-rebuild switch --flake .#foosballrasp
+        ## and test it on your laptop (it starts a qemu VM) with:
+        ## $ nix build .#foosballrasp-vm
+        ## $ ./result/bin/run-nixos-vm
+        ## It has no server, and uses https://foosball.cwi.nl
+        (mkNixosConfigAndIntegratedVm {
+          name = "foosballrasp-no-server";
           myModules = [
             ./hardware-configuration.nix
             self.nixosModules.cwi-foosball-kiosk
@@ -44,7 +121,6 @@
             }
           ];
         })
-        ## This is the main configuration for the computer in the foosball room (nixos)
         ## Install it with:
         ## $ sudo nixos-rebuild switch --flake .#foosballrasp-extern-api-
         ## and test it on your laptop (it starts a qemu VM) with:
@@ -117,12 +193,16 @@
         (mkNixosConfigAndIntegratedVm {
           name = "minimalist";
           myModules = [
+            ./hardware-configuration.nix
             self.nixosModules.cwi-foosball-kiosk
             {
               services.CWIFoosballKiosk = {
                 rasp3b.enable = true;
                 login.enable = true;
-                genericSystem.enable = true;
+                genericSystem = {
+                  enable = true;
+                  # noGui = true;
+                };
               };
             }
           ];
