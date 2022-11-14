@@ -29,7 +29,7 @@ $ sh <(curl -L https://nixos.org/nix/install) --daemon
 To test the raspberry pi system (that basically starts an OS with a navigator that connects to the https://foosball.cwi.nl/ url) you just need to run:
 
 ```bash
-$ nix build --flake .#foosballrasp-vm
+$ nix build .#foosballrasp-vm
 $ rm -f nixos.qcow2 # Remove state from previous runs (sometimes it creates inconsistencies when we build a new derivation)
 $ ./result/bin/run-nixos-vm
 ```
