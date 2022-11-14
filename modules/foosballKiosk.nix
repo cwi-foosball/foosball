@@ -29,6 +29,11 @@ with lib;
         example = "https://foosball.cwi.nl";
         description = "Url of the server to open in the browser";
       };
+      enableLoadingPage = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Opens a loading page until the server has started (useful to avoid 404 error when nginx is loading). Used only if urlServer starts with localhost.";
+      };
     };
     # lxqt is the default option (faster than xfce, itself faster than kde)
     lxqt = {
