@@ -1,9 +1,11 @@
 { nixpkgs, system, pkgs, ... }:
 { name,
   myModules ? [],
-  myModulesNotVm ? [],
-  myModulesInVm ? [],
-  defaultConfig ? {} }:
+  myModulesSystemOnly ? [], # Only in normal system (like hardware configuration), not in VM or sdcard
+  myModulesVmOnly     ? [], # Only in vm
+  myModulesSdcardOnly ? [], # Only in sdcard
+  mySpecialArgs ? {}
+}:
 {
   # Main system
   # You can even compile it on a laptop with:
@@ -19,7 +21,8 @@
   packages.nixosConfigurations.${name} = nixpkgs.lib.nixosSystem {
     system = system; # flake needs to know the architecture of the OS
     # specialArgs = attrs; # One module needs access to nixpkgs to import qemu stuff (actually maybe not even necessary)
-    modules = myModules ++ myModulesNotVm ++ [ defaultConfig ];
+    modules = myModules ++ myModulesSystemOnly;
+    specialArgs = mySpecialArgs;
   };
   # Qemu with host integration (for better efficiency, copy/paste…)
   # (also easier to toogle on/off)
@@ -27,10 +30,10 @@
     let
       nixosConfigWithVM = nixpkgs.lib.nixosSystem {
         system = system; # flake needs to know the architecture of the OS
-        modules = myModules ++ myModulesInVm ++ [
+        modules = myModules ++ myModulesVmOnly ++ [
           "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix" # Not compatible with non-vm machines
-          defaultConfig
         ];
+        specialArgs = mySpecialArgs;
       };
     in pkgs.writeShellApplication {
       name = "run-nixos-vm";
@@ -49,11 +52,11 @@
   ## In nixos (configuration.nix):
   ##  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
   ## Then, you can compile an sd image like that:
-  ## $ nix build .#packages.aarch64-linux.nixosConfigurations.NAMEOFIMAGE-sdcard.config.system.build.sdImage
+  ## $ nix build .#packages.aarch64-linux.NAMEOFIMAGE-sdcard.config.system.build.sdImage
   # Main system
-  packages.nixosConfigurations."${name}-sdcard" = nixpkgs.lib.nixosSystem {
+  packages."${name}-sdcard" = nixpkgs.lib.nixosSystem {
     system = system; # flake needs to know the architecture of the OS
-    modules = myModules ++ myModulesNotVm ++ [
+    modules = myModules ++ myModulesSdcardOnly ++ [
       ({lib, modulesPath, ...}: {
         imports = [ (modulesPath + "/installer/sd-card/sd-image-aarch64.nix")];
         # otherwise it tries to install zfs which is broken on recent pi
@@ -61,7 +64,7 @@
         # Do not compress the image as we want to use it straight away
         sdImage.compressImage = false;
       })
-      defaultConfig
     ];
+    specialArgs = mySpecialArgs;
   };
 }

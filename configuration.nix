@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, includeHardwareConfig ? true , ... }:
 # Would be cleaner to do that part with flake… but flake seems to be more ram consuming than legacy nix for now (some work are being done on that right now)
 let
   cwiFoosballWeb = builtins.fetchTarball {
@@ -10,9 +10,10 @@ let
 in
 {  
   imports = [
-    ./hardware-configuration.nix             # Hardware
     ./modules/foosballKiosk.nix              # Custom module created for the kiosk (chromium stuff)
     (cwiFoosballWeb + "/foosballModule.nix") # External module (imported just above) to setup the web server
+  ] ++ lib.optional includeHardwareConfig [   # Not compatible with SD cards… So we use specialArgs to disable it
+    ./hardware-configuration.nix             # Hardware
   ];
   # Enable the "kiosk" (chromium stuff)
   services.CWIFoosballKiosk = {

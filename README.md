@@ -41,9 +41,9 @@ Note that a file `.*qcow2` is created when running the VM to keep its state. You
 Note that for now, `foosballrasp-vm` uses an external server hosted at https://foosball.cwi.nl (so you need a vpn to access it if you are outside of the building). If you want to create an independent instance, you can use `foosballrasp-with-api-vm` instead to build a full website with the database, and `foosballrasp-extern-api-vm` if you want to use a local frontend but use the backend of https://foosball.cwi.nl (useful to share the same database but get a more recent GUI).
 
 
-### Install on a raspberry pi
+### Install on a raspberry pi from a basic NixOs install
 
-To install the OS on a raspberry pi, you need to follow the generic instructions to install NixOs on a raspberry pi [here](https://nixos.wiki/wiki/NixOS_on_ARM#Installation) (see also the page [dedicated to Model 3 B](https://nixos.wiki/wiki/NixOS_on_ARM/Raspberry_Pi_3) which is the one used at CWI). Some other ressources include [this tutorial](https://nix.dev/tutorials/installing-nixos-on-a-raspberry-pi).
+To install the OS on a raspberry pi (see also the next section for an alternative method), you need to follow the generic instructions to install NixOs on a raspberry pi [here](https://nixos.wiki/wiki/NixOS_on_ARM#Installation) (see also the page [dedicated to Model 3 B](https://nixos.wiki/wiki/NixOS_on_ARM/Raspberry_Pi_3) which is the one used at CWI). Some other ressources include [this tutorial](https://nix.dev/tutorials/installing-nixos-on-a-raspberry-pi).
 
 Here is what I did exactly to install NixOs:
 - Download the image from https://hydra.nixos.org/build/195908591
@@ -78,3 +78,22 @@ It should create a folder `/etc/nixos/foosball`. To switch your system to this c
 
 
 Note that for now, `foosballrasp` uses an external server hosted at https://foosball.cwi.nl (so you need a vpn to access it if you are outside of the building). If you want to create an independent instance, you can use `foosballrasp-with-api` instead to build a full website with the database, and `foosballrasp-extern-api` if you want to use a local frontend but use the backend of https://foosball.cwi.nl (useful to share the same database but get a more recent GUI).
+
+### Create directly the SD card from the laptop
+
+To install the system on a raspberry pi, you can also directly build the image of the final SD card (including all the configurations present in the current flake) from your laptop (in my test it is way faster, maybe 5x, and saves band-width as only the final system is downloaded) and burn the final image using `dd` (if you want you can also do upgrades similarly using `nix copy`).
+
+Since the raspberry pi is aarch64 and your laptop is certainly x86_64, you first need to enable `binfmt`to run `aarch64` code on your laptop. In NixOs you just need to add `boot.binfmt.emulatedSystems = [ "aarch64-linux" ];`in your configuration (sorry, I'm not sure how this translate to other systems, maybe see what's in the NixOs module and get inspired by [this tutorial](https://codepyre.com/2019/12/arming-yourself/)). Then, run:
+```
+$ nix build .#packages.aarch64-linux.foosballrasp-sdcard.config.system.build.sdImage
+```
+to create the image for the sd card (you can compile similarly images for other configurations in this flake).
+
+Then, you can directly use `dd` as explained above to burn the obtained image on the sd card, boot, and enjoy.
+```
+$ dd if=./result/sd-image/nixos-sd-image-22.11.20221107.667e558-aarch64-linux.img of=/dev/YOUR_DRIVE bs=4M
+```
+
+Then just boot the raspberry pi with this card. It should just work!
+
+To update the system, you can clone the repository in `/etc/nixos` as explained above.

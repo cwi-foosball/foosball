@@ -99,6 +99,11 @@
           myModules = [
             ./configuration.nix
           ];
+          mySpecialArgs = {
+            # We include hardware config in configuration.nix to allow non-flake setup, but we need to disable
+            # it for SD cards
+            includeHardwareConfig = false;
+          };
         })
         ## Install it with:
         ## $ sudo nixos-rebuild switch --flake .#foosballrasp
@@ -108,8 +113,10 @@
         ## It has no server, and uses https://foosball.cwi.nl
         (mkNixosConfigAndIntegratedVm {
           name = "foosballrasp-no-server";
-          myModules = [
+          myModulesSystemOnly = [
             ./hardware-configuration.nix
+          ];
+          myModules = [
             self.nixosModules.cwi-foosball-kiosk
             cwi-foosball-web.nixosModule.default
             {
@@ -129,8 +136,10 @@
         ## It has a server, but uses the external api at https://foosball.cwi.nl
         (mkNixosConfigAndIntegratedVm {
           name = "foosballrasp-extern-api";
-          myModules = [
+          myModulesSystemOnly = [
             ./hardware-configuration.nix
+          ];
+          myModules = [
             self.nixosModules.cwi-foosball-kiosk
             cwi-foosball-web.nixosModule.default
             {
@@ -157,8 +166,10 @@
         ## $ ./result/bin/run-nixos-vm
         (mkNixosConfigAndIntegratedVm {
           name = "foosballrasp-with-api";
-          myModules = [
+          myModulesSystemOnly = [
             ./hardware-configuration.nix
+          ];
+          myModules = [
             self.nixosModules.cwi-foosball-kiosk
             cwi-foosball-web.nixosModule.default
             {
@@ -192,8 +203,10 @@
         ## boot entry
         (mkNixosConfigAndIntegratedVm {
           name = "minimalist";
-          myModules = [
+          myModulesSystemOnly = [
             ./hardware-configuration.nix
+          ];
+          myModules = [
             self.nixosModules.cwi-foosball-kiosk
             {
               services.CWIFoosballKiosk = {
