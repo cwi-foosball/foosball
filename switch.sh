@@ -11,7 +11,7 @@ cd -- "$( dirname -- "${BASH_SOURCE[0]}" )"
 echo "## Downloading nixpkgs..."
 nixpkgs_with_quotes=$(nix-instantiate --eval --expr 'builtins.fetchTarball {
     url = https://github.com/NixOS/nixpkgs/archive/667e5581d16745bcda791300ae7e2d73f49fff25.tar.gz;
-    sha256 = "";
+    sha256 = "HYml7RdQPQ7X13VNe2CoDMqmifsXbt4ACTKxHRKQE3Q=";
   }')
 # Remote the quotes:
 nixpkgs="${nixpkgs_with_quotes//\"}"

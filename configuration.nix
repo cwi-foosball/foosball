@@ -1,4 +1,4 @@
-{ config, pkgs, lib, includeHardwareConfig ? true , ... }:
+{ config, pkgs, lib, isRunWithoutFlake ? true , ... }:
 # Would be cleaner to do that part with flake… but flake seems to be more ram consuming than legacy nix for now (some work are being done on that right now)
 let
   cwiFoosballWeb = builtins.fetchTarball {
@@ -12,8 +12,14 @@ in
   imports = [
     ./modules/foosballKiosk.nix              # Custom module created for the kiosk (chromium stuff)
     (cwiFoosballWeb + "/foosballModule.nix") # External module (imported just above) to setup the web server
-  ] ++ lib.optional includeHardwareConfig [   # Not compatible with SD cards… So we use specialArgs to disable it
+  ] ++ lib.optional isRunWithoutFlake [      # Not compatible with SD cards… So we use specialArgs to disable it
     ./hardware-configuration.nix             # Hardware
+    {
+      # Useful to ensure that nix-shell use the same version as the system (or it might download too much stuff)
+      # In flake we don't use <nixpkgs> since it's part of the flake's input. Without flake
+      # the script switch.sh provides a pinned version of nixpkgs
+      nix.nixPath = [ "nixpkgs=${<nixpkgs>}" ];
+    }
   ];
   # Enable the "kiosk" (chromium stuff)
   services.CWIFoosballKiosk = {

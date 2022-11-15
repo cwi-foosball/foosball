@@ -98,11 +98,15 @@
           name = "foosballrasp";
           myModules = [
             ./configuration.nix
+            {
+              # We read the input from the flake, so we
+              nix.nixPath = [ "nixpkgs=${nixpkgs}" ];
+            }
           ];
           mySpecialArgs = {
             # We include hardware config in configuration.nix to allow non-flake setup, but we need to disable
             # it for SD cards
-            includeHardwareConfig = false;
+            isRunWithoutFlake = false;
           };
         })
         ## Install it with:
