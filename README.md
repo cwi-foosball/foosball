@@ -96,4 +96,8 @@ $ dd if=./result/sd-image/nixos-sd-image-22.11.20221107.667e558-aarch64-linux.im
 
 Then just boot the raspberry pi with this card. It should just work!
 
-To update the system, you can clone the repository in `/etc/nixos` as explained above.
+To update the system, you can clone the repository in `/etc/nixos`:
+```
+[pi@nixos]$ cd /etc/nixos/
+[pi@nixos]$ sudo git clone https://github.com/cwi-fossball/foosball .
+```

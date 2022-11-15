@@ -4,15 +4,24 @@
 # stop script if error
 set -e
 
-# Go to the script folder (useful to have multiple configurations that you can enable in the same system)
+# Go to the flake folder
 cd -- "$( dirname -- "${BASH_SOURCE[0]}" )"
 
-# We pin nixpkgs (flake consumes too much RAM for now on a raspberry pi)
-echo "## Downloading nixpkgs..."
-nixpkgs_with_quotes=$(nix-instantiate --eval --expr 'builtins.fetchTarball {
-    url = https://github.com/NixOS/nixpkgs/archive/667e5581d16745bcda791300ae7e2d73f49fff25.tar.gz;
-    sha256 = "HYml7RdQPQ7X13VNe2CoDMqmifsXbt4ACTKxHRKQE3Q=";
-  }')
-# Remote the quotes:
-nixpkgs="${nixpkgs_with_quotes//\"}"
-sudo nixos-rebuild -I nixos-config=configuration.nix -I "nixpkgs=${nixpkgs}" switch
+# Test the current folder to be sure we are on the raspberry pi (you don't want to override the system)
+if [ -d "/etc/nixos/foosball" ] 
+then
+    echo "You seem to be on the right machine"
+else
+    echo "WARNING: you seem to be on a different machine than the foosball one (can't find /etc/nixos/foosball)"
+    echo "This will reinstall the current system to turn it into a foosball client machine… is it what you want?"
+    read -p "Continue (y/n)? " choice
+    case "$choice" in 
+        y|Y ) echo "Ok it's your choice…";;
+        n|N ) exit 1;;
+        * ) exit 1;;
+    esac
+fi
+echo "Let's install the new system!"
+# Actually you don't even need this if the flake is in /etc/nixos/flake.nix and the current host
+# is foosballrasp. But it may not be the case for the first install for instance
+sudo nixos-rebuild switch --flake .#foosballrasp

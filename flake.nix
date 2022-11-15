@@ -96,11 +96,29 @@
         ## It has no server, and uses https://foosball.cwi.nl
         (mkNixosConfigAndIntegratedVm {
           name = "foosballrasp";
+          myModulesSystemOnly = [
+            ./hardware-configuration.nix
+          ];
+          myModulesVmOnly = [
+            ./hardware-configuration.nix
+          ];
           myModules = [
-            ./configuration.nix
+            self.nixosModules.cwi-foosball-kiosk
+            cwi-foosball-web.nixosModule.default
             {
-              # We read the input from the flake, so we
-              nix.nixPath = [ "nixpkgs=${nixpkgs}" ];
+              # Useful to apply the flake automatically on `nixos-rebuild switch`
+              networking.hostName = "foosballrasp";
+              # Enable the "kiosk" (chromium stuff)
+              services.CWIFoosballKiosk = {
+                enableEverything = true;
+                kiosk.urlServer = "localhost"; # The website is running locally
+              };
+              # Enable a local web server using the web server of foosball.cwi.nl for api/database
+              # (can't get access to foosball.cwi.nl)
+              services.CWIFoosballWeb = {
+                enable = true;
+                domainAPI = "https://foosball.cwi.nl";
+              };
             }
           ];
           mySpecialArgs = {

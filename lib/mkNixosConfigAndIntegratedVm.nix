@@ -4,7 +4,12 @@
   myModulesSystemOnly ? [], # Only in normal system (like hardware configuration), not in VM or sdcard
   myModulesVmOnly     ? [], # Only in vm
   myModulesSdcardOnly ? [], # Only in sdcard
-  mySpecialArgs ? {}
+  mySpecialArgs ? {},
+  defaultModules ? [
+    {
+      nix.nixPath = [ "nixpkgs=${nixpkgs}" ];
+    }
+  ]
 }:
 {
   # Main system
@@ -21,7 +26,7 @@
   packages.nixosConfigurations.${name} = nixpkgs.lib.nixosSystem {
     system = system; # flake needs to know the architecture of the OS
     # specialArgs = attrs; # One module needs access to nixpkgs to import qemu stuff (actually maybe not even necessary)
-    modules = myModules ++ myModulesSystemOnly;
+    modules = defaultModules ++ myModules ++ myModulesSystemOnly;
     specialArgs = mySpecialArgs;
   };
   # Qemu with host integration (for better efficiency, copy/paste…)
@@ -30,14 +35,14 @@
     let
       nixosConfigWithVM = nixpkgs.lib.nixosSystem {
         system = system; # flake needs to know the architecture of the OS
-        modules = myModules ++ myModulesVmOnly ++ [
+        modules = defaultModules ++ myModules ++ myModulesVmOnly ++ [
           "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix" # Not compatible with non-vm machines
         ];
         specialArgs = mySpecialArgs;
       };
     in pkgs.writeShellApplication {
       name = "run-nixos-vm";
-      runtimeInputs = [ pkgs.virt-viewer ];
+      runtimeInputs = [ pkgs.virt-viewer nixosConfigWithVM.config.system.build.vm ];
       text = ''
                 ${nixosConfigWithVM.config.system.build.vm}/bin/run-nixos-vm & PID_QEMU="$!"
                 sleep 1 # I think some tools have an option to wait like -w
@@ -56,10 +61,10 @@
   # Main system
   packages."${name}-sdcard" = nixpkgs.lib.nixosSystem {
     system = system; # flake needs to know the architecture of the OS
-    modules = myModules ++ myModulesSdcardOnly ++ [
+    modules = defaultModules ++ myModules ++ myModulesSdcardOnly ++ [
       ({lib, modulesPath, ...}: {
         imports = [ (modulesPath + "/installer/sd-card/sd-image-aarch64.nix")];
-        # otherwise it tries to install zfs which is broken on recent pi
+        # otherwise it tries to install zfs which is broken on recent kernels
         boot.supportedFilesystems = lib.mkForce [ ];
         # Do not compress the image as we want to use it straight away
         sdImage.compressImage = false;
