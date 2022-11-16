@@ -27,8 +27,8 @@ echo "Let's try to run the config in a VM!"
 # To always start with a fresh system (strange bugs can arrive otherwise if you build different systems
 # with same disk overlay)
 if [ "$keep_data" = false ]; then
-    echo "Removing nixos.qcow2"
-    rm -f nixos.qcow2
+    echo "Removing *.qcow2" # (note that the exact name depends on the hostname)
+    rm -f *.qcow2
 fi
 # Build the configuration
 #nixos-rebuild build-vm --flake .#foosballrasp --show-trace

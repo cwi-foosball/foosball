@@ -44,7 +44,11 @@
       name = "run-nixos-vm";
       runtimeInputs = [ pkgs.virt-viewer nixosConfigWithVM.config.system.build.vm ];
       text = ''
-                ${nixosConfigWithVM.config.system.build.vm}/bin/run-nixos-vm & PID_QEMU="$!"
+                # Search for the /nix/…/bin/run-nixos-vm script… except that the name can vary
+                # The variable is required as it depends on the hostname (defaults to nixos)
+                binary=$(find ${nixosConfigWithVM.config.system.build.vm}/bin/ -name "run-*-vm" | head -n 1)
+                echo "We will run the binary $binary"
+                "$binary" & PID_QEMU="$!"
                 sleep 1 # I think some tools have an option to wait like -w
                 remote-viewer spice://127.0.0.1:5930
                 kill "$PID_QEMU"

@@ -99,14 +99,11 @@
           myModulesSystemOnly = [
             ./hardware-configuration.nix
           ];
-          myModulesVmOnly = [
-            ./hardware-configuration.nix
-          ];
           myModules = [
             self.nixosModules.cwi-foosball-kiosk
             cwi-foosball-web.nixosModule.default
             {
-              # Useful to apply the flake automatically on `nixos-rebuild switch`
+              ## Useful to apply the flake automatically on `nixos-rebuild switch`
               networking.hostName = "foosballrasp";
               # Enable the "kiosk" (chromium stuff)
               services.CWIFoosballKiosk = {
@@ -121,11 +118,6 @@
               };
             }
           ];
-          mySpecialArgs = {
-            # We include hardware config in configuration.nix to allow non-flake setup, but we need to disable
-            # it for SD cards
-            isRunWithoutFlake = false;
-          };
         })
         ## Install it with:
         ## $ sudo nixos-rebuild switch --flake .#foosballrasp
