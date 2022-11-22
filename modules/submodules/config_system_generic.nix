@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, options, lib, pkgs, ... }:
 {
   ### This file contains the configuration that most OS (server, frontend…) should share
   # The goal is to configure as much things as possible in this repository, to do minimal changes on the computer
@@ -32,6 +32,15 @@
 
   # Set your time zone.
   time.timeZone = "Europe/Paris";
+  # Configure ntp (the university blocks default ntp https://discourse.nixos.org/t/ntp-use-values-from-network-manager-via-dhcp/23408)
+  # Get address using `nmcli connection show nameOfConnection | grep -i ntp` and resolve the hostname using
+  # $ sudo nmap -sP 192.16.191.36 
+  networking.timeServers = options.networking.timeServers.default ++ [
+    # Eduroam
+    "ns2.cwi.nl"
+    # cwi-gast
+    "192.168.128.1"
+  ]; 
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
