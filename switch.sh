@@ -8,11 +8,11 @@ set -e
 cd -- "$( dirname -- "${BASH_SOURCE[0]}" )"
 
 # Test the current folder to be sure we are on the raspberry pi (you don't want to override the system)
-if [ -d "/etc/nixos/foosball" ] 
+if [ -f "/etc/nixos/modules/foosballKiosk.nix" ] 
 then
     echo "You seem to be on the right machine"
 else
-    echo "WARNING: you seem to be on a different machine than the foosball one (can't find /etc/nixos/foosball)"
+    echo "WARNING: you seem to be on a different machine than the foosball one (can't find /etc/nixos/modules/foosballKiosk.nix)"
     echo "This will reinstall the current system to turn it into a foosball client machine… is it what you want?"
     read -p "Continue (y/n)? " choice
     case "$choice" in 
